@@ -1,3 +1,78 @@
-from django.shortcuts import render
+from .models import User
+from rest_framework.views import APIView
+from .serializers import (RegisterSerializer,PasswordResetConfirmSerializer,
+                          PasswordResetRequestSerializer)
+from django.template.loader import render_to_string
+from rest_framework import generics, status
+from rest_framework.response import Response
+from rest_framework.permissions import (AllowAny, IsAuthenticated)
+from django.utils.crypto import get_random_string
+from django.core.mail import EmailMultiAlternatives
+from django.conf import settings
+from django.utils.html import strip_tags
+
+
+class RegisterView(generics.CreateAPIView):
+    permission_classes = [AllowAny]
+
+    queryset = User.objects.all()
+    serializer_class = RegisterSerializer
+
+
+class ResetRequestView(APIView):
+    def post(self, request,*args,**kwargs):
+        serializer = PasswordResetRequestSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        user = User.objects.get(email=serializer.validated_data["email"])
+        reset_token = get_random_string(length=32)  # Generate a reset token
+        user.reset_password_token = reset_token
+        user.save()
+
+        reset_link = f"http://127.0.0.1:8000/user/reset-password/{reset_token}/"
+
+        email_to = [user.email]
+        subject = "Password Reset Request"
+        html_content = render_to_string('password_reset_email.html',
+                                        {"user": user, "reset_link": reset_link})
+        text_content = strip_tags(html_content)
+        email = EmailMultiAlternatives(subject, text_content, settings.DEFAULT_FROM_EMAIL, email_to)
+        email.attach_alternative(html_content, 'text/html')
+        email.send()
+
+        return Response(
+            {"message": "Password reset link has been sent to your email."},
+            status=status.HTTP_200_OK,
+        )
+
+
+class ResetConfirmView(APIView):
+    def post(self, request, reset_token):
+        serializer = PasswordResetConfirmSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        try:
+            user = User.objects.get(reset_password_token=reset_token)
+        except User.DoesNotExist:
+            return Response(
+                {"error": "Invalid or expired token."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if serializer.validated_data["new_password"] != serializer.validated_data["confirm_new_password"]:
+            return Response(
+                {"error": "Passwords do not match."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        user.set_password(serializer.validated_data["new_password"])
+        user.reset_password_token = None
+        user.save()
+
+        return Response(
+            {"message": "Password reset successful."},
+            status=status.HTTP_200_OK,
+        )
+
 
 # Create your views here.
