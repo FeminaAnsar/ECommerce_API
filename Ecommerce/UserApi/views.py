@@ -1,4 +1,5 @@
-from .models import User
+from .models import User,Product
+from AdminApi.models import Category
 from rest_framework.views import APIView
 from .serializers import (RegisterSerializer,PasswordResetConfirmSerializer,
                           PasswordResetRequestSerializer)
@@ -75,4 +76,4 @@ class ResetConfirmView(APIView):
         )
 
 
-# Create your views here.
+

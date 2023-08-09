@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import User
+from .models import User,Product
 from django.conf import settings
 from django.template.loader import render_to_string
 from django.core.mail import EmailMultiAlternatives
@@ -62,3 +62,28 @@ class PasswordResetRequestSerializer(serializers.Serializer):
 class PasswordResetConfirmSerializer(serializers.Serializer):
     new_password = serializers.CharField(write_only=True)
     confirm_new_password = serializers.CharField(write_only=True)
+
+
+class ListProductSerializer(serializers.ModelSerializer):
+    discount = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Product
+        fields = ['id', 'product_name', 'price', 'offer', 'discount']
+
+    def get_discount(self, obj):
+        discount = obj.price - (obj.price * obj.offer / 100)
+        return discount
+
+
+# Product Details Serializer
+class ProductDetailSerializer(serializers.ModelSerializer):
+    discount = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Product
+        fields = ['id', 'product_name', 'description', 'price', 'stock', 'available', 'image', 'offer', 'discount']
+
+    def get_discount(self, obj):
+        discount = obj.price - (obj.price * obj.offer / 100)
+        return discount
