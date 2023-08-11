@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import User,Product
+from AdminApi.models import User,Product,Category
 from django.conf import settings
 from django.template.loader import render_to_string
 from django.core.mail import EmailMultiAlternatives
@@ -9,6 +9,7 @@ from django.contrib.auth.password_validation import validate_password
 
 class RegisterSerializer(serializers.ModelSerializer):
     confirm_password=serializers.CharField(write_only=True, required=True)
+
 
     class Meta:
         model = User
@@ -64,26 +65,32 @@ class PasswordResetConfirmSerializer(serializers.Serializer):
     confirm_new_password = serializers.CharField(write_only=True)
 
 
-class ListProductSerializer(serializers.ModelSerializer):
-    discount = serializers.SerializerMethodField()
+class CategoryListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Category
+        fields = ['id', 'category_name']
+
+
+class ProductListSerializer(serializers.ModelSerializer):
+    discount_price = serializers.SerializerMethodField()
+    categories = CategoryListSerializer(many=True)
 
     class Meta:
         model = Product
-        fields = ['id', 'product_name', 'price', 'offer', 'discount']
+        fields = ['id', 'product_name', 'price', 'offer', 'discount_price','categories']
 
-    def get_discount(self, obj):
-        discount = obj.price - (obj.price * obj.offer / 100)
-        return discount
+    def get_discount_price(self, obj):
+        discount_price = obj.price - (obj.price * obj.offer / 100)
+        return discount_price
 
 
-# Product Details Serializer
 class ProductDetailSerializer(serializers.ModelSerializer):
-    discount = serializers.SerializerMethodField()
+    discount_price = serializers.SerializerMethodField()
 
     class Meta:
         model = Product
-        fields = ['id', 'product_name', 'description', 'price', 'stock', 'available', 'image', 'offer', 'discount']
+        fields = ['id', 'product_name', 'description', 'price', 'quantity', 'available', 'image', 'offer', 'discount_price']
 
-    def get_discount(self, obj):
-        discount = obj.price - (obj.price * obj.offer / 100)
-        return discount
+    def get_discount_price(self, obj):
+        discount_price = obj.price - (obj.price * obj.offer / 100)
+        return discount_price

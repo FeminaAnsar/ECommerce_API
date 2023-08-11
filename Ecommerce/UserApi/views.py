@@ -2,7 +2,11 @@ from .models import User,Product
 from AdminApi.models import Category
 from rest_framework.views import APIView
 from .serializers import (RegisterSerializer,PasswordResetConfirmSerializer,
-                          PasswordResetRequestSerializer)
+                          PasswordResetRequestSerializer,CategoryListSerializer,
+                          ProductListSerializer,ProductDetailSerializer)
+from django_filters import FilterSet, RangeFilter
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.filters import OrderingFilter, SearchFilter
 from django.template.loader import render_to_string
 from rest_framework import generics, status
 from rest_framework.response import Response
@@ -11,6 +15,7 @@ from django.utils.crypto import get_random_string
 from django.core.mail import EmailMultiAlternatives
 from django.conf import settings
 from django.utils.html import strip_tags
+from AdminApi.pagination import CustomPagination
 
 
 class RegisterView(generics.CreateAPIView):
@@ -76,4 +81,31 @@ class ResetConfirmView(APIView):
         )
 
 
+class CategoryListView(generics.ListAPIView):
+    permission_classes = [IsAuthenticated]
+    queryset = Category.objects.all()
+    serializer_class = CategoryListSerializer
 
+
+class PriceFilter(FilterSet):
+    price = RangeFilter()
+    class Meta:
+        model = Product
+        fields = ['price']
+
+
+class ProductListView(generics.ListAPIView):
+    permission_classes = [IsAuthenticated]
+    queryset = Product.objects.all()
+    serializer_class = ProductListSerializer
+    pagination_class = CustomPagination
+
+    filter_backends = [DjangoFilterBackend,OrderingFilter,SearchFilter]
+    filterset_class = PriceFilter
+    search_fields = ['category__category_name','product_name',]
+
+
+class ProductDetailView(generics.RetrieveAPIView):
+    permission_classes = [IsAuthenticated]
+    queryset = Product.objects.all()
+    serializer_class = ProductDetailSerializer
