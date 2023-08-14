@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from AdminApi.models import User,Product,Category,Contact
 from UserApi.models import CartItems,CartList,Checkout
+from AdminApi.serializers import CartItemsSerializer
 from django.conf import settings
 from django.template.loader import render_to_string
 from django.core.mail import EmailMultiAlternatives
@@ -91,7 +92,7 @@ class ProductDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Product
-        fields = ['id', 'product_name', 'description', 'price', 'quantity', 'available', 'image', 'offer', 'discount_price']
+        fields = ['id', 'product_name', 'description', 'price', 'stock', 'available', 'image', 'offer', 'discount_price']
 
     def get_discount_price(self, obj):
         discount_price = obj.price - (obj.price * obj.offer / 100)
@@ -180,3 +181,16 @@ class ContactInformationSerializer(serializers.ModelSerializer):
         rep['last_name'] = instance.user.last_name
         rep['email'] = instance.user.email
         return rep
+
+
+class OrderHistorySerializer(serializers.ModelSerializer):
+    cart_items = serializers.SerializerMethodField()
+    order_status = serializers.CharField(source='get_order_status_display')
+
+    def get_cart_items(self, cart):
+        cart_items = CartItems.objects.filter(cart=cart)
+        return CartItemsSerializer(cart_items, many=True).data
+
+    class Meta:
+        model = CartList
+        fields = ['id', 'created_at', 'order_status', 'cart_items']

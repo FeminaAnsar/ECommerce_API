@@ -39,6 +39,13 @@ class AddCategoryView(generics.CreateAPIView):
     serializer_class = CategorySerializer
 
 
+class EditCategoryView(generics.UpdateAPIView):
+    permission_classes = [IsAdminUser]
+    authentication_classes = [JWTAuthentication]
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+
+
 class AddProductView(generics.CreateAPIView):
     permission_classes = [IsAdminUser]
     authentication_classes = [JWTAuthentication]

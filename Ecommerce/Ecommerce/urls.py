@@ -16,6 +16,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from UserApi.views import UserLogoutView
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
     TokenRefreshView,
@@ -27,6 +28,8 @@ urlpatterns = [
 
     path('login/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    path('logout/',UserLogoutView.as_view(),name='logout'),
+
 
     path('admin-api/', include('AdminApi.urls')),
 

@@ -3,6 +3,7 @@ from .models import User,Category,Product,Contact
 from phonenumber_field.serializerfields import PhoneNumberField
 from UserApi.models import CartList, CartItems, Checkout
 
+
 class UserListSerializer(serializers.ModelSerializer):
     class Meta:
         model= User
@@ -23,6 +24,7 @@ class CategorySerializer(serializers.ModelSerializer):
 
 class AddProductSerializer(serializers.ModelSerializer):
     categories = serializers.PrimaryKeyRelatedField(queryset=Category.objects.all(), many=True)
+
     class Meta:
         model = Product
         fields = ['categories','product_name','description','price','quantity','available','image','offer']
@@ -31,7 +33,6 @@ class AddProductSerializer(serializers.ModelSerializer):
         categories_data = validated_data.pop('categories')  # Extract categories data
         product = Product.objects.create(**validated_data)
 
-        # Add categories to the product using set()
         for category in categories_data:
             product.categories.add(category)
 

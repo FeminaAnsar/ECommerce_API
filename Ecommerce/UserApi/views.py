@@ -4,7 +4,9 @@ from rest_framework.views import APIView
 from .serializers import (RegisterSerializer,PasswordResetConfirmSerializer,
                           PasswordResetRequestSerializer,CategoryListSerializer,
                           ProductListSerializer,ProductDetailSerializer,AddCartSerializer,
-                          CheckoutSerializer,ContactInformationSerializer,)
+                          CheckoutSerializer,ContactInformationSerializer,OrderHistorySerializer)
+from AdminApi.serializers import CartItemsSerializer
+from .permissions import IsOwner
 from django_filters import FilterSet, RangeFilter
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import OrderingFilter, SearchFilter
@@ -93,6 +95,7 @@ class CategoryListView(generics.ListAPIView):
 
 class PriceFilter(FilterSet):
     price = RangeFilter()
+
     class Meta:
         model = Product
         fields = ['price']
@@ -119,8 +122,51 @@ class ProductDetailView(generics.RetrieveAPIView):
 
 class AddCartView(generics.CreateAPIView):
     permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
     queryset = CartItems.objects.all()
     serializer_class = AddCartSerializer
+
+
+class CartView(generics.ListAPIView):
+    permission_classes = [IsAuthenticated,IsOwner]
+    authentication_classes = [JWTAuthentication]
+    serializer_class = CartItemsSerializer
+
+    def get_queryset(self):
+        user = self.request.user
+        cart = CartList.objects.filter(user=user).first()
+        if cart:
+            return CartItems.objects.filter(cart=cart)
+        return CartItems.objects.none()
+
+
+class UpdateCartItemView(generics.UpdateAPIView):
+    permission_classes = [IsAuthenticated,IsOwner]
+    authentication_classes = [JWTAuthentication]
+    serializer_class = CartItemsSerializer
+
+    def get_queryset(self):
+        user = self.request.user
+        cart = CartList.objects.filter(user=user).first()
+        if cart:
+            return CartItems.objects.filter(cart=cart)
+        return CartItems.objects.none()
+
+    def perform_update(self, serializer):
+        quantity = self.request.data.get('quantity')
+        serializer.save(quantity=quantity)
+
+
+class RemoveCartItemView(generics.DestroyAPIView):
+    permission_classes = [IsAuthenticated,IsOwner]
+    authentication_classes = [JWTAuthentication]
+
+    def get_queryset(self):
+        user = self.request.user
+        cart = CartList.objects.filter(user=user).first()
+        if cart:
+            return CartItems.objects.filter(cart=cart)
+        return CartItems.objects.none()
 
 
 class ContactInformationView(generics.ListAPIView):
@@ -139,6 +185,7 @@ class CheckoutView(generics.CreateAPIView):
 
 class ProfileView(generics.GenericAPIView):
     permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
 
     def get(self, format=None):
         user = self.request.user
@@ -157,3 +204,14 @@ class UserLogoutView(generics.GenericAPIView):
     def post(self,request):
         logout(request)
         return Response({'message':'Logout Successful'},status=status.HTTP_200_OK)
+
+
+class OrderHistoryView(generics.ListAPIView):
+    permission_classes = [IsAuthenticated,IsOwner]
+    serializer_class = OrderHistorySerializer
+    pagination_class = CustomPagination
+    authentication_classes = [JWTAuthentication]
+    
+    def get_queryset(self):
+        user = self.request.user
+        return CartList.objects.filter(user=user)
