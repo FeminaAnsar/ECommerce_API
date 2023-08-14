@@ -2,7 +2,9 @@ from django.urls import path
 from .views import (
     UserListView,UserDeleteView,
     AddCategoryView,
-    AddProductView,EditProductView,DeleteProductView
+    AddProductView,EditProductView,DeleteProductView,
+    OrderListView,OrderDetailView,OrderStatusUpdateView,
+    PromotionalMail
 )
 
 urlpatterns = [
@@ -14,4 +16,10 @@ urlpatterns = [
     path('product/add/', AddProductView.as_view(),name='add-product'),
     path('product/edit/<int:pk>/', EditProductView.as_view(),name='edit-product'),
     path('product/delete/<int:pk>/', DeleteProductView.as_view(),name='delete-product'),
+
+    path('order/list/',OrderListView.as_view(),name='order-list'),
+    path('order/detail/',OrderDetailView.as_view(),name='order-detail'),
+    path('order/status-update/',OrderStatusUpdateView.as_view,name='order-status-update'),
+
+    path('send-promotional-mail/',PromotionalMail.as_view(),name='promotional-mail')
     ]

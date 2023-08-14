@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from .models import User,Category,Product,Contact
 from phonenumber_field.serializerfields import PhoneNumberField
-
+from UserApi.models import CartList, CartItems, Checkout
 
 class UserListSerializer(serializers.ModelSerializer):
     class Meta:
@@ -81,5 +81,33 @@ class ListContactSerializer(serializers.ModelSerializer):
         return rep
 
 
-# List Product Serializer
+class CartItemsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CartItems
+        fields = ['product', 'quantity']
+
+
+class CheckoutSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Checkout
+        fields = ['mobile', 'address', 'landmark', 'state', 'country', 'pincode', 'payment_amount', 'payment_method']
+
+
+class OrderListSerializer(serializers.ModelSerializer):
+    cart_items = CartItemsSerializer(many=True)
+    checkout_info = CheckoutSerializer()
+
+    class Meta:
+        model = CartList
+        fields = ['id', 'user', 'created_at', 'cart_items', 'checkout_info','order_status']
+
+
+class OrderDetailSerializer(serializers.ModelSerializer):
+    cart_items = CartItemsSerializer(many=True)
+    checkout_info = CheckoutSerializer()
+
+    class Meta:
+        model = CartList
+        fields = ['id', 'user', 'created_at', 'cart_items', 'checkout_info','order_status']
+
 

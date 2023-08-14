@@ -7,6 +7,12 @@ from phonenumber_field.modelfields import PhoneNumberField
 class CartList(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     created_at = models.DateField(auto_now_add=True)
+    ORDER_STATUS_CHOICES = (
+        ('processing', 'Processing'),
+        ('shipped', 'Shipped'),
+        ('delivered', 'Delivered'),
+    )
+    order_status = models.CharField(max_length=20, choices=ORDER_STATUS_CHOICES, default='processing')
 
     class Meta:
         ordering = ['id']

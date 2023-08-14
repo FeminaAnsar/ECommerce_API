@@ -2,9 +2,23 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }}</title>
 </head>
 <body>
+    <div style="background-color: #f2f2f2; padding: 20px;">
 
+        <p style="color: #ff5722; font-family: Arial, sans-serif;">
+            Dear {{user.username }},<br>
+            Your Order status have been updated to {{order_status}}<br>
+            It will reach you soon.<br>
+
+        </p>
+        <p style="font-family: Arial, sans-serif; color: #555;">
+
+            Happy Shopping.<br><br>
+
+        </p>
+    </div>
 </body>
 </html>
