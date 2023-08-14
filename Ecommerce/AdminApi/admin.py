@@ -16,8 +16,8 @@ class CategoryAdmin(admin.ModelAdmin):
 
 @admin.register(models.Product)
 class ProductAdmin(admin.ModelAdmin):
-    fields = ['product_name','description','price','quantity','available','image','offer']
-    list_display = ['id','product_name','description','price','quantity','available','image','offer']
+    fields = ['product_name','description','price','stocky','available','image','offer']
+    list_display = ['id','product_name','description','price','stock','available','image','offer']
 
     def categories_display(self, obj):
         return ", ".join([category.category_name for category in obj.categories.all()])

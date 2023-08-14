@@ -1,10 +1,12 @@
 from rest_framework import serializers
-from AdminApi.models import User,Product,Category
+from AdminApi.models import User,Product,Category,Contact
+from UserApi.models import CartItems,CartList,Checkout
 from django.conf import settings
 from django.template.loader import render_to_string
 from django.core.mail import EmailMultiAlternatives
 from django.utils.html import strip_tags
 from django.contrib.auth.password_validation import validate_password
+from datetime import timedelta
 
 
 class RegisterSerializer(serializers.ModelSerializer):
@@ -94,3 +96,87 @@ class ProductDetailSerializer(serializers.ModelSerializer):
     def get_discount_price(self, obj):
         discount_price = obj.price - (obj.price * obj.offer / 100)
         return discount_price
+
+
+class AddCartSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CartItems
+        fields = ['product']
+
+    def create(self, validated_data):
+        user = self.context['request'].user
+        product = self.validated_data['product']
+        if CartList.objects.filter(user=user):
+            item = CartItems.objects.filter(cart__user=user, product=product).first()
+            if item:
+                item.quantity += 1
+                item.save()
+                return item
+            else:
+                item = CartItems.objects.create(cart=CartList.objects.get(user=user), **validated_data)
+                item.save()
+                return item
+        else:
+            cart = CartList.objects.create(user=user)
+            cart.save()
+            item = CartItems.objects.create(cart=cart, **validated_data)
+            item.save()
+            return item
+
+
+class CheckoutSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Checkout
+        exclude = ['user']
+
+    def create(self, validated_data):
+        user = self.context['request'].user
+        items = CartItems.objects.filter(cart__user=user)
+        total = 0
+        if items:
+            for i in items:
+                total += (i.quantity * (i.product.price - (i.product.price * i.product.offer / 100)))
+            checkout = Checkout.objects.create(user=user, payment_amount=total, **validated_data)
+            checkout.save()
+
+            expect_date = checkout.created_at + timedelta(days=10)
+
+            email_to = [user.email]
+            subject = 'CheckOut mail'
+            html_content = render_to_string('checkout_mail.html',
+                                            {'title': 'CheckOut Email','created_at':checkout.created_at,
+                                             'expect_date':expect_date,'name':checkout.first_name,
+                                             'address':checkout.address,'mobile':checkout.mobile,
+                                             'payment':checkout.get_payment_method_display(),'total':total})
+            text_content = strip_tags(html_content)
+            email = EmailMultiAlternatives(subject, text_content, settings.DEFAULT_FROM_EMAIL, email_to)
+            email.attach_alternative(html_content, 'text/html')
+            email.send()
+
+            email_to = 'admin@gmail.com'
+            subject = 'New CheckOut mail'
+            html_content = render_to_string('checkout_mail_admin.html',
+                                            {'title': 'New CheckOut Email', 'created_at': checkout.created_at,
+                                             'expect_date': expect_date, 'name': checkout.first_name,
+                                             'address': checkout.address, 'mobile': checkout.mobile,
+                                             'payment': checkout.get_payment_method_display(), 'total': total})
+            text_content = strip_tags(html_content)
+            email = EmailMultiAlternatives(subject, text_content, settings.DEFAULT_FROM_EMAIL, email_to)
+            email.attach_alternative(html_content, 'text/html')
+            email.send()
+
+            return checkout
+
+
+class ContactInformationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Contact
+        fields = ['id', 'user', 'address', 'mobile']
+
+    def to_representation(self, instance):
+        rep = super(ContactInformationSerializer, self).to_representation(instance)
+        rep['user'] = instance.user.id
+        rep['first_name'] = instance.user.first_name
+        rep['last_name'] = instance.user.last_name
+        rep['email'] = instance.user.email
+        return rep

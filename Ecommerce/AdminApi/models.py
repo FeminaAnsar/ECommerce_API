@@ -46,7 +46,7 @@ class Product(models.Model):
     product_name = models.CharField(max_length=250, unique=True)
     description = models.TextField()
     price = models.IntegerField()
-    quantity = models.IntegerField()
+    stock = models.PositiveIntegerField()
     available = models.BooleanField()
     image = models.ImageField(upload_to='product')
     offer = models.FloatField()

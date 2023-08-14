@@ -15,7 +15,7 @@ class CartList(models.Model):
         return self.user.email
 
 
-class Items(models.Model):
+class CartItems(models.Model):
     cart = models.ForeignKey(CartList, on_delete=models.CASCADE)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     quantity = models.IntegerField(default=1)

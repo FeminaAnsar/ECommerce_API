@@ -1,15 +1,18 @@
-from .models import User,Product
-from AdminApi.models import Category
+from .models import CartList,CartItems,Checkout
+from AdminApi.models import Category,User,Product,Contact
 from rest_framework.views import APIView
 from .serializers import (RegisterSerializer,PasswordResetConfirmSerializer,
                           PasswordResetRequestSerializer,CategoryListSerializer,
-                          ProductListSerializer,ProductDetailSerializer)
+                          ProductListSerializer,ProductDetailSerializer,AddCartSerializer,
+                          CheckoutSerializer,ContactInformationSerializer,)
 from django_filters import FilterSet, RangeFilter
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import OrderingFilter, SearchFilter
 from django.template.loader import render_to_string
 from rest_framework import generics, status
+from django.contrib.auth import logout
 from rest_framework.response import Response
+from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.permissions import (AllowAny, IsAuthenticated)
 from django.utils.crypto import get_random_string
 from django.core.mail import EmailMultiAlternatives
@@ -83,6 +86,7 @@ class ResetConfirmView(APIView):
 
 class CategoryListView(generics.ListAPIView):
     permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
     queryset = Category.objects.all()
     serializer_class = CategoryListSerializer
 
@@ -96,6 +100,7 @@ class PriceFilter(FilterSet):
 
 class ProductListView(generics.ListAPIView):
     permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
     queryset = Product.objects.all()
     serializer_class = ProductListSerializer
     pagination_class = CustomPagination
@@ -107,5 +112,48 @@ class ProductListView(generics.ListAPIView):
 
 class ProductDetailView(generics.RetrieveAPIView):
     permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
     queryset = Product.objects.all()
     serializer_class = ProductDetailSerializer
+
+
+class AddCartView(generics.CreateAPIView):
+    permission_classes = [IsAuthenticated]
+    queryset = CartItems.objects.all()
+    serializer_class = AddCartSerializer
+
+
+class ContactInformationView(generics.ListAPIView):
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
+    queryset = Contact.objects.all()
+    serializer_class = ContactInformationSerializer
+
+
+class CheckoutView(generics.CreateAPIView):
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
+    queryset = Checkout.objects.all()
+    serializer_class = CheckoutSerializer
+
+
+class ProfileView(generics.GenericAPIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, format=None):
+        user = self.request.user
+        context = {
+            'User': str(self.request.user),
+            'Email': str(self.request.user.email),
+            'Username': str(self.request.user.username)
+        }
+        return Response(context)
+
+
+class UserLogoutView(generics.GenericAPIView):
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
+
+    def post(self,request):
+        logout(request)
+        return Response({'message':'Logout Successful'},status=status.HTTP_200_OK)
