@@ -1,12 +1,12 @@
 from .models import CartList,CartItems,Checkout
-from AdminApi.models import Category,User,Product,Contact
+from AdminApi.models import Category,User,Product
 from rest_framework.views import APIView
 from .serializers import (RegisterSerializer,PasswordResetConfirmSerializer,
                           PasswordResetRequestSerializer,CategoryListSerializer,
                           ProductListSerializer,ProductDetailSerializer,AddCartSerializer,
-                          CheckoutSerializer,ContactInformationSerializer,OrderHistorySerializer)
+                          CheckoutSerializer,OrderHistorySerializer)
 from AdminApi.serializers import CartItemsSerializer
-from django_filters import FilterSet, RangeFilter
+from django_filters import FilterSet, RangeFilter,CharFilter
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import OrderingFilter, SearchFilter
 from django.template.loader import render_to_string
@@ -94,10 +94,11 @@ class CategoryListView(generics.ListAPIView):
 
 class PriceFilter(FilterSet):
     price = RangeFilter()
+    categories__category_name = CharFilter(field_name='categories__category_name')
 
     class Meta:
         model = Product
-        fields = ['price']
+        fields = ['price','categories__category_name']
 
 
 class ProductListView(generics.ListAPIView):
@@ -109,7 +110,7 @@ class ProductListView(generics.ListAPIView):
 
     filter_backends = [DjangoFilterBackend,OrderingFilter,SearchFilter]
     filterset_class = PriceFilter
-    search_fields = ['category__category_name','product_name',]
+    search_fields = ['categories__category_name','product_name']
 
 
 class ProductDetailView(generics.RetrieveAPIView):
@@ -137,6 +138,18 @@ class CartView(generics.ListAPIView):
         if cart:
             return CartItems.objects.filter(cart=cart)
         return CartItems.objects.none()
+
+    def get(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        serializer = self.get_serializer(queryset, many=True)
+
+        total_price = sum(
+            item.product.price - (item.product.price * item.product.offer / 100) * item.quantity for item in queryset)
+        response_data = {
+            "cart_items": serializer.data,
+            "total_price": total_price
+        }
+        return Response(response_data)
 
 
 class UpdateCartItemView(generics.UpdateAPIView):
@@ -174,13 +187,6 @@ class RemoveCartItemView(generics.DestroyAPIView):
             {"message": "Cart Item deleted successfully"},
             status=status.HTTP_204_NO_CONTENT
         )
-
-
-class ContactInformationView(generics.ListAPIView):
-    permission_classes = [IsAuthenticated]
-    authentication_classes = [JWTAuthentication]
-    queryset = Contact.objects.all()
-    serializer_class = ContactInformationSerializer
 
 
 class CheckoutView(generics.CreateAPIView):
@@ -221,4 +227,4 @@ class OrderHistoryView(generics.ListAPIView):
 
     def get_queryset(self):
         user = self.request.user
-        return CartList.objects.filter(user=user)
+        return Checkout.objects.filter(user=user)

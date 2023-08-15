@@ -2,7 +2,7 @@ from django.urls import path
 from .views import (
     RegisterView, ResetRequestView, ResetConfirmView,
     CategoryListView,ProductListView,ProductDetailView,
-    ProfileView,ContactInformationView,
+    ProfileView,
     AddCartView,CartView,UpdateCartItemView,RemoveCartItemView,
     CheckoutView,OrderHistoryView
 )
@@ -29,7 +29,7 @@ urlpatterns = [
     path('checkout/',CheckoutView.as_view(),name='checkout'),
     path('order-history/',OrderHistoryView.as_view(),name='order-history'),
 
-    path('contact-details/',ContactInformationView.as_view(),name='cart_add'),
+
 
 
 ]

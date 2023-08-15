@@ -1,6 +1,5 @@
 from rest_framework import serializers
-from .models import User,Category,Product,Contact
-from phonenumber_field.serializerfields import PhoneNumberField
+from .models import User,Category,Product
 from UserApi.models import CartList, CartItems, Checkout
 
 
@@ -53,45 +52,20 @@ class DeleteProductSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class AddContactSerializer(serializers.ModelSerializer):
-    mobile = PhoneNumberField(region="IN")
-    class Meta:
-        model = Contact
-        fields = ['user', 'address','mobile']
-
-    def create(self, validated_data):
-        user = self.validated_data['user']
-        address = self.validated_data['user']
-        mobile = self.validated_data['user']
-        if Contact.objects.filter(user=user).exists():
-            raise serializers.ValidationError('User with contact information is already exist')
-        elif Contact.objects.filter(address=address).exists():
-            raise serializers.ValidationError('User with this contact already exist')
-        else:
-            contact = Contact.objects.create(**validated_data)
-            return contact
-
-
-class ListContactSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Contact
-        fields = ['id','user','address','mobile']
-
-    def to_representation(self, instance):
-        rep = super(ListContactSerializer,self).to_representation(instance)
-        rep['user'] = instance.user.username
-        return rep
-
-
 class CartItemsSerializer(serializers.ModelSerializer):
     product_name = serializers.SerializerMethodField()
+    subtotal = serializers.SerializerMethodField()
 
     class Meta:
         model = CartItems
-        fields = ['product','product_name', 'quantity']
+        fields = ['product','product_name', 'quantity','subtotal']
 
     def get_product_name(self, obj):
         return obj.product.product_name
+
+    def get_subtotal(self, obj):
+        discount_price = obj.product.price - (obj.product.price * obj.product.offer / 100)
+        return discount_price * obj.quantity
 
 
 class CheckoutSerializer(serializers.ModelSerializer):

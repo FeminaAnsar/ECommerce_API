@@ -25,10 +25,6 @@ class ProductAdmin(admin.ModelAdmin):
     categories_display.short_description = 'Categories'
 
 
-@admin.register(models.Contact)
-class ContactAdmin(admin.ModelAdmin):
-    fields = ['user','address','mobile']
-    list_display = ['user','address','mobile']
 
 
 # Register your models here.

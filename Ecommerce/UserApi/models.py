@@ -1,7 +1,5 @@
 from django.db import models
 from AdminApi.models import User,Product
-from django_countries.fields import CountryField
-from phonenumber_field.modelfields import PhoneNumberField
 
 
 class CartList(models.Model):
@@ -57,5 +55,15 @@ class Checkout(models.Model):
 
     def __str__(self):
         return self.user.email
+
+
+class OrderedItem(models.Model):
+    checkout = models.ForeignKey(Checkout, on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    quantity = models.PositiveIntegerField()
+    subtotal = models.FloatField()
+
+    def __str__(self):
+        return f"{self.quantity} x {self.product.product_name} - {self.subtotal}"
 
 # Create your models here.

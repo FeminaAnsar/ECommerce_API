@@ -1,6 +1,6 @@
 from rest_framework import serializers
-from AdminApi.models import User,Product,Category,Contact
-from UserApi.models import CartItems,CartList,Checkout
+from AdminApi.models import User,Product,Category
+from UserApi.models import CartItems,CartList,Checkout,OrderedItem
 from AdminApi.serializers import CartItemsSerializer
 from django.conf import settings
 from django.template.loader import render_to_string
@@ -134,11 +134,32 @@ class CheckoutSerializer(serializers.ModelSerializer):
         user = self.context['request'].user
         items = CartItems.objects.filter(cart__user=user)
         total = 0
+        ordered_items = []
         if items:
             for i in items:
                 total += (i.quantity * (i.product.price - (i.product.price * i.product.offer / 100)))
+                ordered_item = OrderedItem(
+                    checkout=None,
+                    product=i.product,
+                    quantity=i.quantity,
+                    subtotal=i.product.price * i.quantity
+                )
+                ordered_items.append(ordered_item)
             checkout = Checkout.objects.create(user=user, payment_amount=total, **validated_data)
+
+            for ordered_item in ordered_items:
+                ordered_item.checkout = checkout
+                ordered_item.save()
+
+            for item in items:
+                product = item.product
+                if product.stock < item.quantity:
+                    raise serializers.ValidationError(f"Product {product.product_name} is out of stock.")
+                product.stock -= item.quantity
+                product.save()
+
             checkout.save()
+            items.delete()
 
             expect_date = checkout.created_at + timedelta(days=10)
 
@@ -146,7 +167,7 @@ class CheckoutSerializer(serializers.ModelSerializer):
             subject = 'CheckOut mail'
             html_content = render_to_string('checkout_mail.html',
                                             {'title': 'CheckOut Email','created_at':checkout.created_at,
-                                             'expect_date':expect_date,'name':checkout.first_name,
+                                             'expect_date':expect_date,'name':user.username,
                                              'address':checkout.address,'mobile':checkout.mobile,
                                              'payment':checkout.get_payment_method_display(),'total':total})
             text_content = strip_tags(html_content)
@@ -154,11 +175,11 @@ class CheckoutSerializer(serializers.ModelSerializer):
             email.attach_alternative(html_content, 'text/html')
             email.send()
 
-            email_to = 'admin@gmail.com'
+            email_to = ['admin@gmail.com']
             subject = 'New CheckOut mail'
             html_content = render_to_string('checkout_mail_admin.html',
                                             {'title': 'New CheckOut Email', 'created_at': checkout.created_at,
-                                             'expect_date': expect_date, 'name': checkout.first_name,
+                                             'expect_date': expect_date, 'name': user.username,
                                              'address': checkout.address, 'mobile': checkout.mobile,
                                              'payment': checkout.get_payment_method_display(), 'total': total})
             text_content = strip_tags(html_content)
@@ -167,30 +188,25 @@ class CheckoutSerializer(serializers.ModelSerializer):
             email.send()
 
             return checkout
+        raise serializers.ValidationError("No Items for checkout")
 
 
-class ContactInformationSerializer(serializers.ModelSerializer):
+class OrderedItemSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Contact
-        fields = ['id', 'user', 'address', 'mobile']
-
-    def to_representation(self, instance):
-        rep = super(ContactInformationSerializer, self).to_representation(instance)
-        rep['user'] = instance.user.id
-        rep['first_name'] = instance.user.first_name
-        rep['last_name'] = instance.user.last_name
-        rep['email'] = instance.user.email
-        return rep
+        model = OrderedItem
+        fields = ['product', 'quantity', 'subtotal']
 
 
 class OrderHistorySerializer(serializers.ModelSerializer):
-    cart_items = serializers.SerializerMethodField()
-    order_status = serializers.CharField(source='get_order_status_display')
+    ordered_items = serializers.SerializerMethodField()
+    order_status = serializers.CharField(source='checkout.cart.order_status')
 
-    def get_cart_items(self, cart):
-        cart_items = CartItems.objects.filter(cart=cart)
-        return CartItemsSerializer(cart_items, many=True).data
+    def get_ordered_items(self, checkout):
+        ordered_items = OrderedItem.objects.filter(checkout=checkout)
+        return OrderedItemSerializer(ordered_items, many=True).data
 
     class Meta:
-        model = CartList
-        fields = ['id', 'created_at', 'order_status', 'cart_items']
+        model = Checkout
+        fields = ['id', 'created_at', 'order_status', 'ordered_items']
+
+

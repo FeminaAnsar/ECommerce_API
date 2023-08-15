@@ -1,6 +1,5 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
-from phonenumber_field.modelfields import PhoneNumberField
 
 
 class User(AbstractUser):
@@ -15,18 +14,6 @@ class User(AbstractUser):
 
     def __str__(self):
         return self.email
-
-
-class Contact(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    address = models.TextField()
-    mobile = PhoneNumberField(blank=True)
-
-    class Meta:
-        ordering = ('id',)
-
-    def __str__(self):
-        return self.user
 
 
 class Category(models.Model):
