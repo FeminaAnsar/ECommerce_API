@@ -19,7 +19,7 @@ urlpatterns = [
     path('category/list/',CategoryListView.as_view(),name='category_list'),
 
     path('product/list/',ProductListView.as_view(),name='product_list'),
-    path('product/detail/<int:pk>',ProductDetailView.as_view(),name='product_detail'),
+    path('product/detail/<int:pk>/',ProductDetailView.as_view(),name='product_detail'),
 
     path('cart/add/',AddCartView.as_view(),name='cart_add'),
     path('cart/view/',CartView.as_view(),name='cart-view'),

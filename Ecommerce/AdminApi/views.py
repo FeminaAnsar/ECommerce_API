@@ -31,6 +31,16 @@ class UserDeleteView(generics.DestroyAPIView):
     queryset = User.objects.all()
     serializer_class = UserListSerializer
 
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        user_id = instance.id
+        user_email = instance.email
+        self.perform_destroy(instance)
+        return Response(
+            {"message": "User deleted successfully", "user_id": user_id, "user_email": user_email},
+            status=status.HTTP_204_NO_CONTENT
+        )
+
 
 class AddCategoryView(generics.CreateAPIView):
     permission_classes = [IsAdminUser]
@@ -38,6 +48,18 @@ class AddCategoryView(generics.CreateAPIView):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
 
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+
+        category_id = serializer.data['id']
+        category_name = serializer.data['category_name']
+
+        return Response(
+            {"message": "Category created successfully", "category_id": category_id, "category_name": category_name},
+            status=status.HTTP_201_CREATED
+        )
 
 class EditCategoryView(generics.UpdateAPIView):
     permission_classes = [IsAdminUser]

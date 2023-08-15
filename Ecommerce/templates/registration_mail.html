@@ -4,15 +4,38 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ title }}</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #f2f2f2;
+        }
+        .email-container {
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            font-family: Arial, sans-serif;
+        }
+        .red-text {
+            color: #ff5722;
+        }
+    </style>
 </head>
 <body>
-    <div style="background-color: #f2f2f2; padding: 20px;">
-
-        <p style="color: #ff5722; font-family: Arial, sans-serif;">
-            Dear {{ username }},<br>
-            Welcome to our ECommerce Website.<br>Your registration is successful<br>
+    <div class="email-container">
+        <p class="red-text">
+            Dear {{ username }},
         </p>
-        <p style="font-family: Arial, sans-serif; color: #555;">
+        <p>
+            Welcome to our ECommerce Website.<br>Your registration is successful.
+        </p>
+        <p>
             Welcome to our community.<br>
             Happy Shopping.<br><br>
             <i><b>Thank you for registering.</b></i>

@@ -14,7 +14,7 @@ class CategorySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Category
-        fields = ['category_name']
+        fields = ['id','category_name']
 
     def create(self, validated_data):
         category_name = self.validated_data['category_name']
@@ -23,19 +23,14 @@ class CategorySerializer(serializers.ModelSerializer):
 
 
 class AddProductSerializer(serializers.ModelSerializer):
-    categories = serializers.PrimaryKeyRelatedField(queryset=Category.objects.all(), many=True)
+    categories = CategorySerializer(many=True)
 
     class Meta:
         model = Product
-        fields = ['categories','product_name','description','price','quantity','available','image','offer']
+        fields = ['categories','product_name','description','price','stock','available','image','offer']
 
     def create(self, validated_data):
-        categories_data = validated_data.pop('categories')  # Extract categories data
         product = Product.objects.create(**validated_data)
-
-        for category in categories_data:
-            product.categories.add(category)
-
         return product
 
 
@@ -43,7 +38,7 @@ class EditProductSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Product
-        fields = [ 'description','price','stock','available', 'image','offer']
+        fields = [ 'categories','product_name','description','price','stock','available', 'image','offer']
 
 
 class DeleteProductSerializer(serializers.ModelSerializer):

@@ -80,7 +80,7 @@ class ProductListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Product
-        fields = ['id', 'product_name', 'price', 'offer', 'discount_price','categories']
+        fields = ['id', 'product_name', 'price','image', 'offer', 'discount_price','categories']
 
     def get_discount_price(self, obj):
         discount_price = obj.price - (obj.price * obj.offer / 100)
