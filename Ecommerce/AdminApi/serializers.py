@@ -10,11 +10,11 @@ class UserListSerializer(serializers.ModelSerializer):
         fields= ['first_name','last_name','email','registration_date']
 
 
-class CategorySerializer(serializers.ModelSerializer):
+class AddCategorySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Category
-        fields = ['id','category_name']
+        fields = ['category_name']
 
     def create(self, validated_data):
         category_name = self.validated_data['category_name']
@@ -22,16 +22,22 @@ class CategorySerializer(serializers.ModelSerializer):
         return category
 
 
+class CategorySerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Category
+        fields = ['id','category_name']
+
+
 class AddProductSerializer(serializers.ModelSerializer):
-    categories = CategorySerializer(many=True)
 
     class Meta:
         model = Product
-        fields = ['categories','product_name','description','price','stock','available','image','offer']
+        fields = ['categories', 'product_name', 'description', 'price', 'stock', 'available', 'image', 'offer']
 
-    def create(self, validated_data):
-        product = Product.objects.create(**validated_data)
-        return product
+        def create(self, validated_data):
+            product = Product.objects.create(**validated_data)
+            return product
 
 
 class EditProductSerializer(serializers.ModelSerializer):
@@ -78,9 +84,14 @@ class ListContactSerializer(serializers.ModelSerializer):
 
 
 class CartItemsSerializer(serializers.ModelSerializer):
+    product_name = serializers.SerializerMethodField()
+
     class Meta:
         model = CartItems
-        fields = ['product', 'quantity']
+        fields = ['product','product_name', 'quantity']
+
+    def get_product_name(self, obj):
+        return obj.product.product_name
 
 
 class CheckoutSerializer(serializers.ModelSerializer):

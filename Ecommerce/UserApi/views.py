@@ -6,7 +6,6 @@ from .serializers import (RegisterSerializer,PasswordResetConfirmSerializer,
                           ProductListSerializer,ProductDetailSerializer,AddCartSerializer,
                           CheckoutSerializer,ContactInformationSerializer,OrderHistorySerializer)
 from AdminApi.serializers import CartItemsSerializer
-from .permissions import IsOwner
 from django_filters import FilterSet, RangeFilter
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import OrderingFilter, SearchFilter
@@ -128,7 +127,7 @@ class AddCartView(generics.CreateAPIView):
 
 
 class CartView(generics.ListAPIView):
-    permission_classes = [IsAuthenticated,IsOwner]
+    permission_classes = [IsAuthenticated]
     authentication_classes = [JWTAuthentication]
     serializer_class = CartItemsSerializer
 
@@ -141,7 +140,7 @@ class CartView(generics.ListAPIView):
 
 
 class UpdateCartItemView(generics.UpdateAPIView):
-    permission_classes = [IsAuthenticated,IsOwner]
+    permission_classes = [IsAuthenticated]
     authentication_classes = [JWTAuthentication]
     serializer_class = CartItemsSerializer
 
@@ -158,7 +157,7 @@ class UpdateCartItemView(generics.UpdateAPIView):
 
 
 class RemoveCartItemView(generics.DestroyAPIView):
-    permission_classes = [IsAuthenticated,IsOwner]
+    permission_classes = [IsAuthenticated]
     authentication_classes = [JWTAuthentication]
 
     def get_queryset(self):
@@ -167,6 +166,14 @@ class RemoveCartItemView(generics.DestroyAPIView):
         if cart:
             return CartItems.objects.filter(cart=cart)
         return CartItems.objects.none()
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        self.perform_destroy(instance)
+        return Response(
+            {"message": "Cart Item deleted successfully"},
+            status=status.HTTP_204_NO_CONTENT
+        )
 
 
 class ContactInformationView(generics.ListAPIView):
@@ -190,7 +197,7 @@ class ProfileView(generics.GenericAPIView):
     def get(self, format=None):
         user = self.request.user
         context = {
-            'User': str(self.request.user),
+            'UserID': str(self.request.user.id),
             'Email': str(self.request.user.email),
             'Username': str(self.request.user.username)
         }
@@ -207,7 +214,7 @@ class UserLogoutView(generics.GenericAPIView):
 
 
 class OrderHistoryView(generics.ListAPIView):
-    permission_classes = [IsAuthenticated,IsOwner]
+    permission_classes = [IsAuthenticated]
     serializer_class = OrderHistorySerializer
     pagination_class = CustomPagination
     authentication_classes = [JWTAuthentication]

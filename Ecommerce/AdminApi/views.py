@@ -12,8 +12,8 @@ from rest_framework import status,viewsets
 from rest_framework.response import Response
 from .serializers import OrderListSerializer, OrderDetailSerializer
 from rest_framework_simplejwt.authentication import JWTAuthentication
-from .serializers import (UserListSerializer,CategorySerializer, AddProductSerializer,
-                          EditProductSerializer,DeleteProductSerializer,
+from .serializers import (UserListSerializer,AddCategorySerializer, AddProductSerializer,
+                          EditProductSerializer,DeleteProductSerializer,CategorySerializer,
                         )
 
 
@@ -46,7 +46,7 @@ class AddCategoryView(generics.CreateAPIView):
     permission_classes = [IsAdminUser]
     authentication_classes= [JWTAuthentication]
     queryset = Category.objects.all()
-    serializer_class = CategorySerializer
+    serializer_class = AddCategorySerializer
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -60,6 +60,7 @@ class AddCategoryView(generics.CreateAPIView):
             {"message": "Category created successfully", "category_id": category_id, "category_name": category_name},
             status=status.HTTP_201_CREATED
         )
+
 
 class EditCategoryView(generics.UpdateAPIView):
     permission_classes = [IsAdminUser]
@@ -88,7 +89,15 @@ class DeleteProductView(generics.DestroyAPIView):
     queryset = Product.objects.all()
     serializer_class = DeleteProductSerializer
 
-
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        product_id = instance.id
+        product_name = instance.product_name
+        self.perform_destroy(instance)
+        return Response(
+            {"message": "Product deleted successfully", "product_id": product_id, "product_name": product_name},
+            status=status.HTTP_204_NO_CONTENT
+        )
 class OrderListView(generics.ListAPIView):
     queryset = CartList.objects.all()
     serializer_class = OrderListSerializer
