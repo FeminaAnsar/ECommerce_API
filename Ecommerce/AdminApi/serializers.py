@@ -74,21 +74,14 @@ class CheckoutSerializer(serializers.ModelSerializer):
         fields = ['mobile', 'address', 'landmark', 'state', 'country', 'pincode', 'payment_amount', 'payment_method']
 
 
-class OrderListSerializer(serializers.ModelSerializer):
-    cart_items = CartItemsSerializer(many=True)
-    checkout_info = CheckoutSerializer()
+class OrderConfirmSerializer(serializers.ModelSerializer):
 
+    created_user=serializers.SerializerMethodField()
     class Meta:
-        model = CartList
-        fields = ['id', 'user', 'created_at', 'cart_items', 'checkout_info','order_status']
+        model = Checkout
+        fields = ['id','user','order_status']
 
-
-class OrderDetailSerializer(serializers.ModelSerializer):
-    cart_items = CartItemsSerializer(many=True)
-    checkout_info = CheckoutSerializer()
-
-    class Meta:
-        model = CartList
-        fields = ['id', 'user', 'created_at', 'cart_items', 'checkout_info','order_status']
+    def get_created_user(self,instance):
+        return instance.created_user.username
 
 

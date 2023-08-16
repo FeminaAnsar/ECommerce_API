@@ -1,10 +1,10 @@
-from .models import CartList,CartItems,Checkout
+from .models import CartList,CartItems,Checkout,OrderedItem
 from AdminApi.models import Category,User,Product
 from rest_framework.views import APIView
 from .serializers import (RegisterSerializer,PasswordResetConfirmSerializer,
                           PasswordResetRequestSerializer,CategoryListSerializer,
                           ProductListSerializer,ProductDetailSerializer,AddCartSerializer,
-                          CheckoutSerializer,OrderHistorySerializer)
+                          CheckoutSerializer,PastOrderSerializer)
 from AdminApi.serializers import CartItemsSerializer
 from django_filters import FilterSet, RangeFilter,CharFilter
 from django_filters.rest_framework import DjangoFilterBackend
@@ -220,11 +220,10 @@ class UserLogoutView(generics.GenericAPIView):
 
 
 class OrderHistoryView(generics.ListAPIView):
+    serializer_class = PastOrderSerializer
     permission_classes = [IsAuthenticated]
-    serializer_class = OrderHistorySerializer
-    pagination_class = CustomPagination
     authentication_classes = [JWTAuthentication]
-
+    pagination_class = CustomPagination
     def get_queryset(self):
         user = self.request.user
         return Checkout.objects.filter(user=user)

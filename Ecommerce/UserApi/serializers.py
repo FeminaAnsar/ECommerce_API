@@ -134,31 +134,33 @@ class CheckoutSerializer(serializers.ModelSerializer):
         user = self.context['request'].user
         items = CartItems.objects.filter(cart__user=user)
         total = 0
-        ordered_items = []
+        ordered_items_data = []
         if items:
             for i in items:
                 total += (i.quantity * (i.product.price - (i.product.price * i.product.offer / 100)))
-                ordered_item = OrderedItem(
-                    checkout=None,
-                    product=i.product,
-                    quantity=i.quantity,
-                    subtotal=i.product.price * i.quantity
+                ordered_items_data.append(
+                    {
+                     'product': i.product, 'quantity': i.quantity,
+                     'subtotal': (i.quantity * (i.product.price - (i.product.price * i.product.offer / 100)))
+                     }
                 )
-                ordered_items.append(ordered_item)
             checkout = Checkout.objects.create(user=user, payment_amount=total, **validated_data)
-
-            for ordered_item in ordered_items:
-                ordered_item.checkout = checkout
-                ordered_item.save()
 
             for item in items:
                 product = item.product
                 if product.stock < item.quantity:
                     raise serializers.ValidationError(f"Product {product.product_name} is out of stock.")
+                elif product.stock > item.quantity:
+                    raise serializers.ValidationError(f"{product.product_name} :Quantity exceeds available stock")
                 product.stock -= item.quantity
                 product.save()
 
             checkout.save()
+
+            OrderedItem.objects.bulk_create(
+                [OrderedItem(checkout=checkout, **item_data) for item_data in ordered_items_data]
+            )
+
             items.delete()
 
             expect_date = checkout.created_at + timedelta(days=10)
@@ -197,16 +199,13 @@ class OrderedItemSerializer(serializers.ModelSerializer):
         fields = ['product', 'quantity', 'subtotal']
 
 
-class OrderHistorySerializer(serializers.ModelSerializer):
-    ordered_items = serializers.SerializerMethodField()
-    order_status = serializers.CharField(source='checkout.cart.order_status')
-
-    def get_ordered_items(self, checkout):
-        ordered_items = OrderedItem.objects.filter(checkout=checkout)
-        return OrderedItemSerializer(ordered_items, many=True).data
+class PastOrderSerializer(serializers.ModelSerializer):
+    ordered_items = OrderedItemSerializer(many=True)
 
     class Meta:
         model = Checkout
         fields = ['id', 'created_at', 'order_status', 'ordered_items']
+
+
 
 

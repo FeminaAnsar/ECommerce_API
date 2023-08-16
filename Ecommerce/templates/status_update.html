@@ -4,21 +4,54 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ title }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f2f2f2;
+        }
+        .container {
+            background-color: #ffffff;
+            padding: 20px;
+            margin: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            color: #ff5722;
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+        .order-details {
+            color: #555;
+            font-size: 16px;
+            line-height: 1.5;
+        }
+        .cta {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .cta a {
+            display: inline-block;
+            background-color: #ff5722;
+            color: #ffffff;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+        }
+    </style>
 </head>
 <body>
-    <div style="background-color: #f2f2f2; padding: 20px;">
-
-        <p style="color: #ff5722; font-family: Arial, sans-serif;">
-            Dear {{user.username }},<br>
-            Your Order status have been updated to {{order_status}}<br>
-            It will reach you soon.<br>
-
-        </p>
-        <p style="font-family: Arial, sans-serif; color: #555;">
-
-            Happy Shopping.<br><br>
-
-        </p>
+    <div class="container">
+        <div class="header">
+            Hello {{ user }},
+        </div>
+        <div class="order-details">
+            We are happy to inform you that your order with order ID: <strong>{{ order_id }}</strong>
+            Your order status has been updated to <strong>{{ order_status }}</strong>. It will reach you soon.
+            Happy shopping!
+        </div>
     </div>
 </body>
 </html>

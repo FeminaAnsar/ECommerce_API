@@ -5,12 +5,7 @@ from AdminApi.models import User,Product
 class CartList(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     created_at = models.DateField(auto_now_add=True)
-    ORDER_STATUS_CHOICES = (
-        ('processing', 'Processing'),
-        ('shipped', 'Shipped'),
-        ('delivered', 'Delivered'),
-    )
-    order_status = models.CharField(max_length=20, choices=ORDER_STATUS_CHOICES, default='processing')
+
 
     class Meta:
         ordering = ['id']
@@ -49,6 +44,13 @@ class Checkout(models.Model):
     payment_amount = models.FloatField(default=0)
     payment_method = models.IntegerField(choices=CHOICES)
     created_at = models.DateField(auto_now_add=True)
+    ORDER_STATUS_CHOICES = (
+        ('processing', 'Processing'),
+        ('shipped', 'Shipped'),
+        ('delivered', 'Delivered'),
+    )
+    order_status = models.CharField(max_length=20, choices=ORDER_STATUS_CHOICES, default='processing')
+
 
     class Meta:
         ordering = ['id', ]
@@ -58,7 +60,7 @@ class Checkout(models.Model):
 
 
 class OrderedItem(models.Model):
-    checkout = models.ForeignKey(Checkout, on_delete=models.CASCADE)
+    checkout = models.ForeignKey(Checkout, on_delete=models.CASCADE, related_name='ordered_items')
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField()
     subtotal = models.FloatField()

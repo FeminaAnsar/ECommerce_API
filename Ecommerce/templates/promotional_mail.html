@@ -1,22 +1,47 @@
 <!DOCTYPE html>
-<html lang="en" xmlns="http://www.w3.org/1999/html">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ title }}</title>
+    <title>Freedom day Sale</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            background-color: #f2f2f2;
+            padding: 20px;
+            text-align: center;
+        }
+
+        h1 {
+            color: #ff5722;
+        }
+
+        p {
+            font-size: 18px;
+            line-height: 1.5;
+            margin-top: 20px;
+        }
+
+        .highlight {
+            background-color: #ff5722;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+    </style>
 </head>
 <body>
-    <div style="background-color: #f2f2f2; padding: 20px;">
-        <h1 style="color: #ff5722; font-family: Arial, sans-serif;">
-            Hello {{ user.username }},</h1>
-            <p>
-                Independence day Sale is Live.<br>
-                25% -60% Off for your favourite products<br>
-
-
-            </p><br><br>
-
-
+    <div class="container">
+        <h1>Hello {{ user }},</h1>
+        <p>Independence Day Sale is Live.</p>
+        <p class="highlight">25% - 60% Off for your favorite products.
+            <br><br>From 12 th August to 31st August Only</p>
     </div>
 </body>
 </html>

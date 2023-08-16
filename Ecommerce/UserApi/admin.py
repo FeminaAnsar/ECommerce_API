@@ -21,7 +21,7 @@ class CheckoutAdmin(admin.ModelAdmin):
 
 
 @admin.register(models.OrderedItem)
-class OrderAdmin(admin.ModelAdmin):
-    fields = ['checkout','product','quantity','subtotal']
-    list_display = ['id','checkout_id','product_id','quantity','subtotal']
+class OrderedItemAdmin(admin.ModelAdmin):
+    fields=['checkout','product','quantity','subtotal']
+    list_display = ['id','checkout','product','quantity','subtotal']
 # Register your models here.
