@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ title }}</title>
+    <title>Order Status Update</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -28,28 +28,18 @@
             font-size: 16px;
             line-height: 1.5;
         }
-        .cta {
-            text-align: center;
-            margin-top: 20px;
-        }
-        .cta a {
-            display: inline-block;
-            background-color: #ff5722;
-            color: #ffffff;
-            padding: 10px 20px;
-            border-radius: 5px;
-            text-decoration: none;
-        }
+
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            Hello {{ user }},
+            Greetings ,
         </div>
         <div class="order-details">
-            We are happy to inform you that your order with order ID: <strong>{{ order_id }}</strong>
-            Your order status has been updated to <strong>{{ order_status }}</strong>. It will reach you soon.
+            <p>We are happy to inform you that your order with order ID: <strong>{{ order_id }}</strong></p>
+            <p> order status has been updated to <strong>{{ order_status }}</strong>.</p>
+            <p>It will reach you soon.</p>>
             Happy shopping!
         </div>
     </div>

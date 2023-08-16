@@ -125,7 +125,7 @@ class PromotionalMail(APIView):
 
 
 class OrderListView(generics.ListAPIView):
-    queryset = Checkout.objects.all().select_related('user','address')
+    queryset = Checkout.objects.all().select_related('user')
     serializer_class = CheckoutSerializer
     permission_classes = [IsAdminUser]
     authentication_classes = [JWTAuthentication]
@@ -142,7 +142,7 @@ class OrderDetailView(generics.RetrieveAPIView):
         try:
             instance = self.get_object()
             serializer = CheckoutSerializer(instance)
-            items = OrderedItem.objects.filter(order=instance)
+            items = OrderedItem.objects.filter(checkout=instance)
             order_item_serializer = OrderedItemSerializer(items, many=True)
             response_data = {
                 'order': serializer.data,

@@ -18,8 +18,8 @@ urlpatterns = [
     path('product/delete/<int:pk>/', DeleteProductView.as_view(),name='delete-product'),
 
     path('order/list/',OrderListView.as_view(),name='order-list'),
-    path('order/detail/<int:pk>',OrderDetailView.as_view(),name='order-detail'),
-    path('order/confirm/',OrderConfirmView.as_view,name='order-confirm'),
+    path('order/detail/<int:pk>/',OrderDetailView.as_view(),name='order-detail'),
+    path('order/confirm/<int:pk>/',OrderConfirmView.as_view(),name='order_confirm'),
 
     path('send-promotional-mail/',PromotionalMail.as_view(),name='promotional-mail')
     ]

@@ -17,6 +17,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from UserApi.views import UserLogoutView
+from AdminApi.views import OrderConfirmView
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
     TokenRefreshView,
@@ -32,6 +33,6 @@ urlpatterns = [
 
 
     path('admin-api/', include('AdminApi.urls')),
-
+    #path('order/confirm/<int:pk>/',OrderConfirmView.as_view,name='order-confirm'),
     path('user/', include('UserApi.urls'))
 ]
