@@ -55,11 +55,14 @@ class AddCategoryView(generics.CreateAPIView):
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
 
-        category_id = serializer.data['id']
-        category_name = serializer.data['category_name']
+        instance = serializer.instance
 
         return Response(
-            {"message": "Category created successfully", "category_id": category_id, "category_name": category_name},
+            {
+                "message": "Category created successfully",
+                "category_id": instance.id,  
+                "category_name": instance.category_name,
+            },
             status=status.HTTP_201_CREATED
         )
 
