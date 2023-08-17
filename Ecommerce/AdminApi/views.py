@@ -135,10 +135,10 @@ class OrderListView(generics.ListAPIView):
 
 
 class OrderDetailView(generics.RetrieveAPIView):
-    queryset= Checkout.objects.all()
-    serializer_class= CheckoutSerializer
-    permission_classes=[IsAdminUser]
-    authentication_classes=[JWTAuthentication]
+    queryset = Checkout.objects.all()
+    serializer_class = CheckoutSerializer
+    permission_classes = [IsAdminUser]
+    authentication_classes = [JWTAuthentication]
 
     def get(self, request, *args, **kwargs):
         try:
@@ -146,13 +146,27 @@ class OrderDetailView(generics.RetrieveAPIView):
             serializer = CheckoutSerializer(instance)
             items = OrderedItem.objects.filter(checkout=instance)
             order_item_serializer = OrderedItemSerializer(items, many=True)
+
+
+            ordered_items_list = []
+            for item in order_item_serializer.data:
+                product = Product.objects.get(id=item['product'])
+                ordered_items = {
+                    'product': item['product'],
+                    'product_name': product.product_name,
+                    'quantity': item['quantity'],
+                    'subtotal': item['subtotal']
+                }
+                ordered_items_list.append(ordered_items)
+
             response_data = {
                 'order': serializer.data,
-                'order_items': order_item_serializer.data
+                'order_items': ordered_items_list
             }
             return Response(response_data)
         except Checkout.DoesNotExist:
-            return Response({'error':'Order not found'})
+            return Response({'error': 'Order not found'})
+
 
 
 class OrderConfirmView(generics.UpdateAPIView):
