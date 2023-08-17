@@ -1,7 +1,6 @@
 from rest_framework import serializers
 from AdminApi.models import User,Product,Category
 from UserApi.models import CartItems,CartList,Checkout,OrderedItem
-from AdminApi.serializers import CartItemsSerializer
 from django.conf import settings
 from django.template.loader import render_to_string
 from django.core.mail import EmailMultiAlternatives

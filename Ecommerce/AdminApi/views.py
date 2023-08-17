@@ -8,8 +8,6 @@ from django.template.loader import render_to_string
 from django.core.mail import EmailMultiAlternatives
 from django.utils.html import strip_tags
 from django.conf import settings
-from django.shortcuts import get_object_or_404
-from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework import status
 from .serializers import CheckoutSerializer
@@ -19,6 +17,7 @@ from .serializers import (UserListSerializer,AddCategorySerializer, AddProductSe
                           OrderConfirmSerializer
                         )
 from UserApi.serializers import CheckoutSerializer,OrderedItemSerializer
+
 
 class UserListView(generics.ListAPIView):
     permission_classes = [IsAdminUser]

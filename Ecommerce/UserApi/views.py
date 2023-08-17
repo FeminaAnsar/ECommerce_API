@@ -1,4 +1,4 @@
-from .models import CartList,CartItems,Checkout,OrderedItem
+from .models import CartList,CartItems,Checkout
 from AdminApi.models import Category,User,Product
 from rest_framework.views import APIView
 from .serializers import (RegisterSerializer,PasswordResetConfirmSerializer,

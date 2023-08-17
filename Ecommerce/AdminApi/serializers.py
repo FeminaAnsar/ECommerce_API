@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from .models import User,Category,Product
-from UserApi.models import CartList, CartItems, Checkout
+from UserApi.models import CartItems, Checkout
 
 
 class UserListSerializer(serializers.ModelSerializer):
