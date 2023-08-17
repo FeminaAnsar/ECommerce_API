@@ -60,7 +60,7 @@ class AddCategoryView(generics.CreateAPIView):
         return Response(
             {
                 "message": "Category created successfully",
-                "category_id": instance.id,  
+                "category_id": instance.id,
                 "category_name": instance.category_name,
             },
             status=status.HTTP_201_CREATED

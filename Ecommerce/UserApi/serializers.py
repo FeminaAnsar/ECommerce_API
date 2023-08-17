@@ -149,8 +149,7 @@ class CheckoutSerializer(serializers.ModelSerializer):
                 product = item.product
                 if product.stock < item.quantity:
                     raise serializers.ValidationError(f"Product {product.product_name} is out of stock.")
-                elif product.stock > item.quantity:
-                    raise serializers.ValidationError(f"{product.product_name} :Quantity exceeds available stock")
+
                 product.stock -= item.quantity
                 product.save()
 

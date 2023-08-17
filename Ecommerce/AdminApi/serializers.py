@@ -64,9 +64,11 @@ class CartItemsSerializer(serializers.ModelSerializer):
         return obj.product.product_name
 
     def get_subtotal(self, obj):
-        discount_price = obj.product.price - (obj.product.price * obj.product.offer / 100)
-        return discount_price * obj.quantity
-
+        offer_per=(obj.product.price * obj.product.offer / 100)
+        discount_price = obj.product.price - offer_per
+        quantity=int(obj.quantity)
+        sub_total= discount_price * quantity
+        return sub_total
 
 class CheckoutSerializer(serializers.ModelSerializer):
     class Meta:

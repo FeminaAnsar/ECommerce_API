@@ -36,7 +36,7 @@ class Product(models.Model):
     stock = models.PositiveIntegerField()
     available = models.BooleanField()
     image = models.ImageField(upload_to='product')
-    offer = models.FloatField()
+    offer = models.IntegerField()
     created_at = models.DateField(auto_now_add=True)
     updated_at = models.DateField(auto_now=True)
     categories = models.ManyToManyField(Category)
