@@ -6,7 +6,7 @@ from UserApi.models import CartList, CartItems, Checkout
 class UserListSerializer(serializers.ModelSerializer):
     class Meta:
         model= User
-        fields= ['first_name','last_name','email','registration_date']
+        fields= ['id','first_name','last_name','email','registration_date']
 
 
 class AddCategorySerializer(serializers.ModelSerializer):
